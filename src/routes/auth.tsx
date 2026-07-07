@@ -26,7 +26,7 @@ function AuthPage() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
+    supabase.auth.getUser().then(({ data }: { data: { user: unknown } }) => {
       if (data.user) navigate({ to: "/notes" });
     });
   }, [navigate]);
