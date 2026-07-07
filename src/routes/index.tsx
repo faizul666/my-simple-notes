@@ -1,24 +1,43 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { Button } from "@/components/ui/button";
+import { StickyNote } from "lucide-react";
 
-// No head() here: the home route inherits title/description/og/twitter from
-// __root.tsx, and ships no og:image so serve-time hosting can inject the
-// project's social preview (explicit og:image or latest screenshot).
 export const Route = createFileRoute("/")({
-  component: Index,
+  head: () => ({
+    meta: [
+      { title: "MyNotes — a calm place for your thoughts" },
+      { name: "description", content: "A simple, private notes app. Sign in and start writing." },
+      { property: "og:title", content: "MyNotes" },
+      { property: "og:description", content: "A simple, private notes app." },
+    ],
+  }),
+  component: Landing,
 });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
-function Index() {
+function Landing() {
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
+    <div className="min-h-screen flex items-center justify-center bg-background px-4">
+      <div className="max-w-md text-center space-y-6">
+        <div className="flex justify-center">
+          <div className="h-14 w-14 rounded-2xl bg-secondary flex items-center justify-center">
+            <StickyNote className="h-7 w-7 text-primary" />
+          </div>
+        </div>
+        <div className="space-y-2">
+          <h1 className="text-4xl font-semibold tracking-tight">MyNotes</h1>
+          <p className="text-muted-foreground">
+            A calm, private space for your thoughts. Sign in to view and add notes.
+          </p>
+        </div>
+        <div className="flex gap-3 justify-center">
+          <Button asChild>
+            <Link to="/auth">Get started</Link>
+          </Button>
+          <Button variant="outline" asChild>
+            <Link to="/notes">Open notes</Link>
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }
