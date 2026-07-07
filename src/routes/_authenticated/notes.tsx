@@ -55,11 +55,13 @@ function NotesPage() {
     e.preventDefault();
     if (!title.trim()) return;
     setSaving(true);
-    // Do NOT include user_id — the DB default (auth.uid()) fills it in,
-    // and the authenticated supabase client sends the user's session.
-    const payload: { title: string; content: string | null } = {
+    // Stamp the note with the logged-in user's id explicitly. This satisfies
+    // the RLS INSERT policy (with check auth.uid() = user_id) regardless of
+    // whether the table has a DEFAULT auth.uid() on user_id.
+    const payload = {
       title: title.trim(),
       content: content.trim() || null,
+      user_id: user.id,
     };
     const { error } = await (supabase.from("notes") as any).insert(payload);
     setSaving(false);
