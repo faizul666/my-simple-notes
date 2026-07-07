@@ -55,10 +55,13 @@ function NotesPage() {
     e.preventDefault();
     if (!title.trim()) return;
     setSaving(true);
-    const { error } = await supabase.from("notes").insert({
+    // Do NOT include user_id — the DB default (auth.uid()) fills it in,
+    // and the authenticated supabase client sends the user's session.
+    const payload: { title: string; content: string | null } = {
       title: title.trim(),
       content: content.trim() || null,
-    } as any);
+    };
+    const { error } = await (supabase.from("notes") as any).insert(payload);
     setSaving(false);
     if (error) {
       toast.error(error.message);
