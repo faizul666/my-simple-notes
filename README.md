@@ -4,6 +4,14 @@ A small full-stack notes app where every user signs in and sees **only their own
 
 Built as a portfolio piece to demonstrate a real production workflow: an AI-generated frontend wired to a hand-secured backend, then debugged and hardened by hand.
 
+## Screenshots
+
+| Sign in | Your notes (logged in as one user) |
+| --- | --- |
+| ![Login screen](docs/login.png) | ![Notes screen](docs/notes.png) |
+
+Each user only ever sees their own notes — the list on the right belongs to the logged-in account and contains no other user's data.
+
 ## What it does
 
 - Email / password authentication (sign up + log in)
