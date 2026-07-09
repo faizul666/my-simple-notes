@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
-import { Trash2, StickyNote, LogOut } from "lucide-react";
+import { Trash2, StickyNote, LogOut, Crown } from "lucide-react";
 
 type Note = {
   id: string;
@@ -36,6 +36,8 @@ function NotesPage() {
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [isPaid, setIsPaid] = useState(false);
+  const [upgrading, setUpgrading] = useState(false);
 
   const load = async () => {
     const { data, error } = await supabase
@@ -47,9 +49,39 @@ function NotesPage() {
     setLoading(false);
   };
 
+  // Read this user's paid status from the subscribers table. RLS lets them
+  // read only their own row; the row only exists once the webhook created it.
+  const loadPaidStatus = async () => {
+    const { data } = await (supabase.from("subscribers") as any)
+      .select("is_paid")
+      .eq("user_id", user.id)
+      .maybeSingle();
+    setIsPaid(!!data?.is_paid);
+  };
+
   useEffect(() => {
     load();
+    loadPaidStatus();
   }, []);
+
+  // Start checkout: ask the edge function for a Stripe Checkout URL, then send
+  // the browser there. The user's session is attached automatically by
+  // functions.invoke, which is how create-checkout knows who is paying.
+  const upgrade = async () => {
+    setUpgrading(true);
+    const { data, error } = await supabase.functions.invoke("create-checkout");
+    if (error) {
+      toast.error(error.message);
+      setUpgrading(false);
+      return;
+    }
+    if (data?.url) {
+      window.location.href = data.url as string;
+    } else {
+      toast.error("Could not start checkout");
+      setUpgrading(false);
+    }
+  };
 
   const addNote = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -101,6 +133,16 @@ function NotesPage() {
           </div>
           <div className="flex items-center gap-3">
             <span className="text-sm text-muted-foreground hidden sm:inline">{user.email}</span>
+            {isPaid ? (
+              <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
+                <Crown className="h-3.5 w-3.5" /> Premium
+              </span>
+            ) : (
+              <Button size="sm" onClick={upgrade} disabled={upgrading}>
+                <Crown className="h-4 w-4 mr-2" />
+                {upgrading ? "Redirecting…" : "Upgrade — $9"}
+              </Button>
+            )}
             <Button variant="ghost" size="sm" onClick={signOut}>
               <LogOut className="h-4 w-4 mr-2" /> Sign out
             </Button>

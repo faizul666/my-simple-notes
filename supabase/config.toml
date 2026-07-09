@@ -1,1 +1,11 @@
 project_id = "yakzddejuknqlhyslyer"
+
+# create-checkout is called by the frontend WITH the user's Supabase session,
+# so it keeps JWT verification on (the default).
+[functions.create-checkout]
+verify_jwt = true
+
+# stripe-webhook is called by Stripe, which has no Supabase session. It is
+# authenticated by the Stripe signature instead, so JWT verification is off.
+[functions.stripe-webhook]
+verify_jwt = false
